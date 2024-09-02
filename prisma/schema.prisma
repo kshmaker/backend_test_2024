@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//유저는 유저 식별번호, 유저 이름, 이메일, 가입일, 비번 포함
+model User{
+  uuid String @id @default(uuid())
+  name String
+  email String @unique //데이터 안 겹치게 해줌
+  createdAt DateTime @default(now())
+  password String 
+  posts Post[] //여러 개의 게시물과 연결
+}
+
+//게시물은 제목, 본문, 생성날짜, 태그, 글쓴이의 정보를 포함함.
+
+model Post{
+  id Int @id @default(autoincrement())
+  //prisma에서 모델을 정의할 때, 해당 모델에 최소한 하나의 고유한 기준(유일성 제약 조건)이 필요하다는 규칙이 존재함.
+  title String
+  content String
+  createdAt DateTime @default(now()) @map("created_at")
+  deleteAt DateTime? 
+  tags Tag[]
+  
+  author User @relation(fields: [authorUuid], references: [uuid])
+  authorUuid String
+  
+  @@map("post")
+  // DB상의 테이블명을 변경할 때 씀
+  //만약 prisma model에서 사용되는 필드이름까지 바꾸려면 @map쓰면 됨
+}
+
+model Tag{
+  id Int @id @default(autoincrement())
+  name String @unique
+  posts Post[]
+}
+

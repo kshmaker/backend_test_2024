@@ -1,11 +1,10 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Body, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserDto } from './dto/createUser.dto';
-import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { LoginUserDto, TokenDto } from './dto/loginUser.dto';
+import { LoginUserDto /*TokenDto*/ } from './dto/loginUser.dto';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -17,6 +16,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
+  //최초의 함수는 user.service로 옮김
   async signUp(createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
@@ -52,12 +52,27 @@ export class AuthService {
       refreshToken,
     };
   }
+  async refresh(@Body() body: { refreshToken: string }) {
+    try {
+      const payload = this.jwtService.verify(body.refreshToken, {
+        secret: this.configService.get<string>('JWT_SECRET_KEY'),
+      });
 
-  async refreshToken(userUuid: string, refreshToken: string) {
-    const user = await this.userService.findUserByUuid(userUuid);
+      const aceessToken = this.jwtService.sign(
+        { email: payload.email, sub: payload.sub },
+        {
+          secret: this.configService.get<string>(''),
+          expiresIn: this.configService.get<string>('JWT_Access_expiresIn'),
+        },
+      );
+
+      return aceessToken;
+    } catch {
+      return { message: 'Expired refresh token' };
+    }
   }
 
-  async deleteUser(user: User) {
-    return this.prisma.user.delete({ where: { uuid: user.uuid } });
-  }
+  // async deleteUser(user: User) {
+  //   return this.prisma.user.delete({ where: { uuid: user.uuid } });
+  // }
 }

@@ -11,7 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 @Module({
   imports: [
     ConfigModule.forRoot(), // 환경 변수 모듈
-    PassportModule,
+    PassportModule, //registerAsync를 사용하면 설정을 비동기적으로 설정할 수 있음
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

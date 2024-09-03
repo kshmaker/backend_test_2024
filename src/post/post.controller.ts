@@ -8,10 +8,13 @@ import {
   Put,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { PostService } from './post.service';
 import { JwtAccessTokenGuard } from 'src/auth/guards/accessToken.guard';
+import { CreatePostDto } from './dto/createPost.dto';
+import { SearchPostDto } from './dto/searchPost.dto';
 
 @Controller('post')
 export class PostController {
@@ -23,10 +26,7 @@ export class PostController {
   //로그인 후 게시물 작성
   @UseGuards(JwtAccessTokenGuard)
   @Post()
-  async createPost(
-    @Body() body: { title: string; content: string },
-    @Request() req,
-  ) {
+  async createPost(createPostDto: CreatePostDto, authorUuid: string) {
     return this.postService.createPost(body.title, body.content, req.user.uuid);
   }
 
@@ -57,5 +57,10 @@ export class PostController {
   @Delete(':id')
   async deletePost(@Param('id') id: string) {
     return this.postService.deletePost(Number(id));
+  }
+
+  @Get('search')
+  async searchPosts(@Query() searchPostDto: SearchPostDto) {
+    return this.postService.searchPosts(searchPostDto.query);
   }
 }

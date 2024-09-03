@@ -20,6 +20,6 @@ export class CreatePostDto {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayUnique()
-  @IsString({ each: true })
+  @IsString({ each: true }) //각각이 string인지 확인하기
   tags?: string[];
 }

@@ -7,7 +7,6 @@ import {
   Delete,
   Put,
   UseGuards,
-  Request,
   Query,
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
@@ -24,12 +23,11 @@ export class PostController {
   ) {}
 
   //로그인 후 게시물 작성
-
-  // @UseGuards(JwtAccessTokenGuard)
-  // @Post()
-  // async createPost(createPostDto: CreatePostDto, authorUuid: string) {
-  //   return this.postService.createPost(body.title, body.content, req.user.uuid);
-  // }
+  @UseGuards(JwtAccessTokenGuard)
+  @Post()
+  async createPost(createPostDto: CreatePostDto, authorUuid: string) {
+    return this.postService.createPost(body.title, body.content, req.user.uuid);
+  }
 
   //로그인 없이 모든 게시물 조회
   @Get()

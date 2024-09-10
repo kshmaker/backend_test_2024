@@ -7,6 +7,7 @@ import {
   Query,
   ParseIntPipe,
   Patch,
+  Req,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAccessTokenGuard } from 'src/auth/guards/accessToken.guard';
@@ -24,8 +25,8 @@ export class PostController {
   //로그인 후 게시물 작성
   @UseGuards(JwtAccessTokenGuard)
   @Post()
-  async createPost(createPostDto: CreatePostDto, authorUuid: string) {
-    return this.postService.createPost(createPostDto, authorUuid);
+  async createPost(createPostDto: CreatePostDto, @Req() req) {
+    return this.postService.createPost(createPostDto, req.userUuid);
   }
 
   //사용자가 게시물 수정
@@ -38,8 +39,8 @@ export class PostController {
   //사용자가 게시물 삭제
   @UseGuards(JwtAccessTokenGuard)
   @Patch(':id')
-  async deletePost(@Param('id', ParseIntPipe) id: number, userUuid: string) {
-    return this.postService.deletePost(id, userUuid);
+  async deletePost(@Param('id', ParseIntPipe) id: number, @Req() req) {
+    return this.postService.deletePost(id, req.userUuid);
   }
 
   @Get('tag/:tagName')

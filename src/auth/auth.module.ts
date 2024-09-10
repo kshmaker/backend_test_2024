@@ -9,6 +9,8 @@ import { JwtRefreshTokenStrategy } from './strategies/refreshToken.strategy';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { UserRepository } from 'src/user/user.repository';
+import { AuthRepository } from './auth.repository';
 
 @Module({
   imports: [
@@ -34,12 +36,15 @@ import { PrismaModule } from 'src/prisma/prisma.module';
   controllers: [AuthController],
   providers: [
     AuthService,
+    AuthRepository,
     UserService,
     ConfigService,
     PrismaService,
     JwtService,
     JwtAccessTokenStrategy,
     JwtRefreshTokenStrategy,
+    UserRepository,
   ],
+  exports: [AuthService],
 })
 export class AuthModule {}

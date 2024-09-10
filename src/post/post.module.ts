@@ -8,6 +8,7 @@ import { JwtAccessTokenStrategy } from 'src/auth/strategies/accessToken.strategy
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from 'src/user/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { PostRepository } from './post.repository';
 
 @Module({
   imports: [
@@ -16,7 +17,13 @@ import { ConfigModule } from '@nestjs/config';
     PrismaModule,
     UserModule,
   ],
-  providers: [PostService, PrismaService, JwtService, JwtAccessTokenStrategy],
+  providers: [
+    PostRepository,
+    PostService,
+    PrismaService,
+    JwtService,
+    JwtAccessTokenStrategy,
+  ],
   controllers: [PostController],
 })
 export class PostModule {}

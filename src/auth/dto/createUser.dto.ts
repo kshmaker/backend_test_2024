@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-import { IsStrongPassword } from '../validators/password.validator';
+//import { IsStrongPassword } from '../validators/password.validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -11,7 +11,7 @@ export class CreateUserDto {
   @ApiProperty({ description: '강화된 비밀번호사용할 것!' })
   @IsString()
   @IsNotEmpty()
-  @IsStrongPassword({ message: 'At leat 8 characters etc..' })
+  //@IsStrongPassword({ message: 'At leat 8 characters etc..' })
   password: string;
 
   @IsString()

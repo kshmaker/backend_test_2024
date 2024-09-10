@@ -1,4 +1,5 @@
 import {
+  IsNumber,
   IsString,
   IsNotEmpty,
   IsOptional,
@@ -21,5 +22,23 @@ export class CreatePostDto {
   @ArrayNotEmpty()
   @ArrayUnique()
   @IsString({ each: true }) //각각이 string인지 확인하기
+  tags?: string[];
+}
+
+export class UpdatePostDto {
+  @IsNumber()
+  id: number;
+
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @IsOptional()
+  @IsString()
+  content: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   tags?: string[];
 }

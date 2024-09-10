@@ -5,6 +5,7 @@ import {
   // Request,
   // UseGuards,
   Controller,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -12,6 +13,7 @@ import { LoginUserDto } from './dto/loginUser.dto';
 // import { JwtAccessTokenGuard } from './guards/accessToken.guard';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { JwtRefreshTokenGuard } from './guards/refreshToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -31,7 +33,7 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
-  //여기서만 jwtService랑 configServic를 둘 다 씀
+  @UseGuards(JwtRefreshTokenGuard)
   @Post('refresh')
   async refresh(@Body() body: { refreshToken: string }) {
     return this.authService.refresh(body);

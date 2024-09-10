@@ -31,7 +31,7 @@ model Post{
   title String
   content String
   createdAt DateTime @default(now()) @map("created_at")
-  deleteAt DateTime? 
+  deletedAt DateTime? 
   tags Tag[]
   
   author User @relation(fields: [authorUuid], references: [uuid])

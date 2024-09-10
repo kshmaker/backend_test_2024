@@ -2,31 +2,49 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   Param,
-  Delete,
-  Put,
   UseGuards,
   Query,
+  ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
 import { PostService } from './post.service';
 import { JwtAccessTokenGuard } from 'src/auth/guards/accessToken.guard';
-import { CreatePostDto } from './dto/createPost.dto';
+import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
 import { SearchPostDto } from './dto/searchPost.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('post')
 @Controller('post')
 export class PostController {
   constructor(
     private readonly postService: PostService, //readonly는 일종의 읽기 전용
-    private readonly userService: UserService,
   ) {}
 
   //로그인 후 게시물 작성
   @UseGuards(JwtAccessTokenGuard)
   @Post()
   async createPost(createPostDto: CreatePostDto, authorUuid: string) {
-    return this.postService.createPost(body.title, body.content, req.user.uuid);
+    return this.postService.createPost(createPostDto, authorUuid);
+  }
+
+  //사용자가 게시물 수정
+  @UseGuards(JwtAccessTokenGuard)
+  @Patch(':id')
+  async updatePost(updatePostDto: UpdatePostDto) {
+    return this.postService.updatePost(updatePostDto);
+  }
+
+  //사용자가 게시물 삭제
+  @UseGuards(JwtAccessTokenGuard)
+  @Patch(':id')
+  async deletePost(@Param('id', ParseIntPipe) id: number, userUuid: string) {
+    return this.postService.deletePost(id, userUuid);
+  }
+
+  @Get('tag/:tagName')
+  async getPostsByTag(@Param('tagName') tagName: string) {
+    return this.postService.getPostsByTag(tagName);
   }
 
   //로그인 없이 모든 게시물 조회
@@ -37,25 +55,8 @@ export class PostController {
 
   //로그인 없이 해당 id의 게시물 조회
   @Get(':id')
-  async getPostById(@Param('id') id: string) {
-    return this.postService.getPostById(Number(id));
-  }
-
-  //사용자가 게시물 수정
-  @UseGuards(JwtAccessTokenGuard)
-  @Put(':id')
-  async updatePost(
-    @Param('id') id: string,
-    @Body() body: { title: string; content: string },
-  ) {
-    return this.postService.updatePost(Number(id), body.title, body.content);
-  }
-
-  //사용자가 게시물 삭제
-  @UseGuards(JwtAccessTokenGuard)
-  @Delete(':id')
-  async deletePost(@Param('id') id: string) {
-    return this.postService.deletePost(Number(id));
+  async getPostById(@Param('id', ParseIntPipe) id: number) {
+    return this.postService.getPostById(id);
   }
 
   @Get('search')

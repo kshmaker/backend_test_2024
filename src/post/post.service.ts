@@ -3,36 +3,28 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePostDto } from './dto/createPost.dto';
+import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
+import { PostRepository } from './post.repository';
 
 @Injectable()
 export class PostService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly postRepository: PostRepository) {}
 
   async createPost(createPostDto: CreatePostDto, authorUuid: string) {
-    const { title, content, tags } = createPostDto;
+    return this.postRepository.createPost(createPostDto, authorUuid);
+  }
 
-    //tag 기능 추가
-    let findORcreateTags = [];
-    if (tags && tags.length > 0) {
-    }
-    //tag 기능 추가
-    let findORcreateTags = [];
-    if (createPostDto.tags && createPostDto.tags.length > 0) {
-      //C++ 보다 낫네 map 이런 거 있으니까
-      findORcreateTags = createPostDto.tags.map((tagName) => ({
-        where: { name: tagName },
-        create: { name: tagName },
-      }));
-    }
+  async updatePost(updatePostDto: UpdatePostDto) {
+    return this.postRepository.updatePost(updatePostDto);
+  }
+
+  async deletePost(id: number, userUuid: string) {
+    return this.postRepository.deletePost(id, userUuid);
   }
 
   // 게시물 소유자 확인
   async validatePostOwner(postId: number, userUuid: string) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: postId },
-    });
+    const post = await this.getPostById(postId);
 
     if (!post) {
       throw new NotFoundException('This post not found'); //Http status code : 404
@@ -45,63 +37,19 @@ export class PostService {
   }
 
   async getAllPosts() {
-    return this.prisma.post.findMany({
-      include: {
-        author: true,
-      },
-    });
+    return this.postRepository.getAllPosts();
   }
 
   async getPostById(id: number) {
-    return this.prisma.post.findUnique({
-      where: { id },
-      include: {
-        author: true,
-      },
-    });
+    return this.postRepository.getPostById(id);
   }
 
-  async updatePost(id: number, title: string, content: string) {
-    return this.prisma.post.update({
-      where: { id },
-      data: {
-        title,
-        content,
-      },
-    });
-  }
-
-  async deletePost(id: number) {
-    return this.prisma.post.delete({
-      where: { id },
-    });
+  async getPostsByTag(tagName: string) {
+    return this.postRepository.getPostsByTag(tagName);
   }
 
   // 제목이나 본문에 특정 글자가 포함된 게시물 검색
   async searchPosts(query: string) {
-    const posts = await this.prisma.post.findMany({
-      where: {
-        OR: [
-          {
-            title: {
-              contains: query,
-              mode: 'insensitive', // 대소문자 구분 없이 검색
-            },
-          },
-          {
-            content: {
-              contains: query,
-              mode: 'insensitive', // 대소문자 구분 없이 검색
-            },
-          },
-        ],
-      },
-      include: {
-        author: true,
-        tags: true,
-      },
-    });
-
-    return posts;
+    return this.postRepository.searchPosts(query);
   }
 }

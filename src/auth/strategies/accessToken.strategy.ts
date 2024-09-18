@@ -22,7 +22,7 @@ export class JwtAccessTokenStrategy extends PassportStrategy(
 
   //token 발급 시 payload에는 userUuid만 넣어둠
   async validate(payload: Payload) {
-    return { userUuId: payload.userUuid };
+    return { userUuid: payload.userUuid };
   }
 }
 

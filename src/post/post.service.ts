@@ -11,6 +11,7 @@ export class PostService {
   constructor(private readonly postRepository: PostRepository) {}
 
   async createPost(createPostDto: CreatePostDto, authorUuid: string) {
+    console.log(authorUuid);
     return this.postRepository.createPost(createPostDto, authorUuid);
   }
 

@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePostDto, UpdatePostDto } from './dto/post.dto';
@@ -14,6 +15,9 @@ export class PostRepository {
   constructor(private prismaService: PrismaService) {}
 
   async createPost(createPostDto: CreatePostDto, authorUuid: string) {
+    if (!authorUuid) {
+      throw new BadRequestException('authorUuid is required');
+    }
     const { title, content, tags } = createPostDto;
 
     //tag
@@ -29,7 +33,9 @@ export class PostRepository {
         data: {
           title,
           content,
-          authorUuid,
+          author: {
+            connect: { uuid: authorUuid },
+          },
           tags: { connectOrCreate: connectOrCreateTags },
         },
         include: {
@@ -43,11 +49,11 @@ export class PostRepository {
             this.logger.debug('User uuid not found');
             throw new NotFoundException('User uuid not found');
           }
-          this.logger.error('createNotice error');
+          this.logger.error('createPost error1');
           this.logger.debug(error);
           throw new InternalServerErrorException('Database Error');
         }
-        this.logger.error('createNotice error');
+        this.logger.error('createPost error2');
         this.logger.debug(error);
         throw new InternalServerErrorException('unknown Error');
       });

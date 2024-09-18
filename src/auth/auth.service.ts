@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Body,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -74,27 +73,38 @@ export class AuthService {
     return tokenDto;
   }
 
-  async refresh(@Body() body: { refreshToken: string }) {
-    try {
-      const payload = this.jwtService.verify(body.refreshToken, {
+  async refresh(userUuid: string) {
+    const newAccessToken = this.jwtService.sign(
+      { userUuid: userUuid },
+      {
         secret: this.configService.get<string>('JWT_SECRET_KEY'),
-      });
-
-      const accessToken = this.jwtService.sign(
-        { userUuid: payload.userUuid },
-        {
-          secret: this.configService.get<string>('JWT_SECRET_KEY'),
-          expiresIn: this.configService.get<string>('JWT_Access_expiresIn'),
-        },
-      );
-
-      return accessToken;
-    } catch {
-      return { message: 'Expired refresh token' };
-    }
+        expiresIn: this.configService.get<string>('JWT_Access_expiresIn'),
+      },
+    );
+    return { accessToken: newAccessToken };
   }
 
-  // async deleteUser(user: User) {
-  //   return this.prisma.user.delete({ where: { uuid: user.uuid } });
+  // async refresh(@Body() body: { refreshToken: string }) {
+  //   try {
+  //     const payload = this.jwtService.verify(body.refreshToken, {
+  //       secret: this.configService.get<string>('JWT_SECRET_KEY'),
+  //     });
+
+  //     const accessToken = this.jwtService.sign(
+  //       { userUuid: payload.userUuid },
+  //       {
+  //         secret: this.configService.get<string>('JWT_SECRET_KEY'),
+  //         expiresIn: this.configService.get<string>('JWT_Access_expiresIn'),
+  //       },
+  //     );
+
+  //     return { accessToken: accessToken };
+  //   } catch {
+  //     return { message: 'Expired refresh token' };
+  //   }
   // }
+
+  async deleteUser(userUuid: string) {
+    return this.authrepository.deleteUser(userUuid);
+  }
 }

@@ -1,11 +1,11 @@
 import {
   Body,
   Post,
-  // Delete,
-  // Request,
-  // UseGuards,
+  Delete,
   Controller,
   UseGuards,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -14,6 +14,7 @@ import { LoginUserDto } from './dto/loginUser.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtRefreshTokenGuard } from './guards/refreshToken.guard';
+import { JwtAccessTokenGuard } from './guards/accessToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -35,13 +36,22 @@ export class AuthController {
 
   @UseGuards(JwtRefreshTokenGuard)
   @Post('refresh')
-  async refresh(@Body() body: { refreshToken: string }) {
-    return this.authService.refresh(body);
+  async refresh(@Req() req) {
+    console.log(req.user);
+    if (!req.user) {
+      throw new UnauthorizedException('Incorrect refresh token');
+    }
+    return this.authService.refresh(req.user.userUuid);
   }
 
-  // @UseGuards(JwtAccessTokenGuard)
-  // @Delete('delete')
-  // async deleteUser(@Request() req) {
-  //   return this.authService.deleteUser(req.user.userId);
+  // async refresh(@Body() body: { refreshToken: string }) {
+  //   return this.authService.refresh(body);
   // }
+
+  //회원 탈퇴
+  @UseGuards(JwtAccessTokenGuard)
+  @Delete('delete')
+  async deleteUser(@Req() req) {
+    return this.authService.deleteUser(req.user.userUuid);
+  }
 }

@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  InternalServerErrorException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/auth/dto/createUser.dto';
 import * as bcrypt from 'bcryptjs';
@@ -30,6 +36,21 @@ export class AuthRepository {
         ) {
           this.logger.debug('user already exists: ${email}');
           throw new ConflictException('이미 계정이 존재합니다.');
+        }
+      });
+  }
+
+  async deleteUser(userUuid: string) {
+    return this.prismaService.user
+      .delete({ where: { uuid: userUuid } })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            throw new NotFoundException('User not found');
+          }
+        } else {
+          this.logger.debug('deleteUser');
+          throw new InternalServerErrorException('unknown Error');
         }
       });
   }

@@ -9,6 +9,7 @@ import {
   Patch,
   Req,
   Body,
+  Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAccessTokenGuard } from 'src/auth/guards/accessToken.guard';
@@ -28,28 +29,32 @@ export class PostController {
   @Post('')
   async createPost(@Body() createPostDto: CreatePostDto, @Req() req) {
     console.log(createPostDto); //전달된 데이터 확인해보기
-    console.log('Request:', req.user);
+    console.log('Request:', req);
     return this.postService.createPost(createPostDto, req.user.userUuid);
   }
 
   //사용자가 게시물 수정
   @UseGuards(JwtAccessTokenGuard)
   @Patch(':id')
-  async updatePost(updatePostDto: UpdatePostDto) {
-    return this.postService.updatePost(updatePostDto);
+  async updatePost(
+    @Param('id', ParseIntPipe) id: number,
+    updatePostDto: UpdatePostDto,
+    @Req() req,
+  ) {
+    console.log(updatePostDto);
+    return this.postService.updatePost(id, updatePostDto, req.user.userUuid);
   }
 
   //사용자가 게시물 삭제
   @UseGuards(JwtAccessTokenGuard)
-  @Patch(':id/delete')
+  @Delete(':id')
   async deletePost(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    return this.postService.deletePost(id, req.userUuid);
+    return this.postService.deletePost(id, req.user.userUuid);
   }
 
-  @Get('tag/:tagName')
-  async getPostsByTag(@Param('tagName') tagName: string) {
-    return this.postService.getPostsByTag(tagName);
-  }
+  /*
+  게시물 조회
+  */
 
   //로그인 없이 모든 게시물 조회
   @Get()
@@ -63,8 +68,14 @@ export class PostController {
     return this.postService.getPostById(id);
   }
 
+  //특정 문자열로 게시물 조회
   @Get('search')
   async searchPosts(@Query() searchPostDto: SearchPostDto) {
     return this.postService.searchPosts(searchPostDto.query);
+  }
+
+  @Get('tag/:tagName')
+  async getPostsByTag(@Param('tagName') tagName: string) {
+    return this.postService.getPostsByTag(tagName);
   }
 }

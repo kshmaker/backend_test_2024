@@ -15,15 +15,29 @@ export class PostService {
     return this.postRepository.createPost(createPostDto, authorUuid);
   }
 
-  async updatePost(updatePostDto: UpdatePostDto) {
-    return this.postRepository.updatePost(updatePostDto);
+  async updatePost(
+    postId: number,
+    updatePostDto: UpdatePostDto,
+    userUuid: string,
+  ) {
+    const post = this.getPostById(postId);
+    if ((await post).authorUuid == userUuid) {
+      return this.postRepository.updatePost(postId, updatePostDto);
+    } else {
+      throw new ForbiddenException('You are not the author of this post');
+    }
   }
 
   async deletePost(id: number, userUuid: string) {
-    return this.postRepository.deletePost(id, userUuid);
+    const deletepost = this.postRepository.getPostById(id);
+    if ((await deletepost).authorUuid === userUuid) {
+      return this.postRepository.deletePost(id, userUuid);
+    } else {
+      throw new ForbiddenException('You are not the author of this post');
+    }
   }
 
-  // 게시물 소유자 확인
+  // 게시물 소유자 확인(근데 굳이 필요 없을 듯?) 일단 함수 만들어두긴 했는데 안 씀
   async validatePostOwner(postId: number, userUuid: string) {
     const post = await this.getPostById(postId);
 

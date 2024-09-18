@@ -1,5 +1,4 @@
 import {
-  IsNumber,
   IsString,
   IsNotEmpty,
   IsOptional,
@@ -26,16 +25,13 @@ export class CreatePostDto {
 }
 
 export class UpdatePostDto {
-  @IsNumber()
-  id: number;
-
   @IsOptional()
   @IsString()
   title?: string;
 
   @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
 
   @IsOptional()
   @IsArray()
